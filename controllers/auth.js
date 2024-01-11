@@ -1,6 +1,6 @@
 const { User }  = require('../models/user');
 const { ctrlWrapper } = require('../decorators');
-const { HttpError, sendEmail } = require('../helpers');
+const { HttpError, sendEmail, cloudinary } = require('../helpers');
 const {nanoid} = require('nanoid')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -125,12 +125,11 @@ const updateSubscription = async (req, res) => {
 
 const updateAvatar = async (req, res) => {
     const { _id } = req.user;
-    const { path: tmpUpload, originalname } = req.file;
-    const filename = `${_id}_${originalname}`;
-    const resultUpload = path.join(avatarsDir, filename);
-    await fs.rename(tmpUpload, resultUpload);
-    const avatarURL = path.join('avatars', filename);
+    const { url } = await cloudinary.uploader.upload(req.file.path, { folder: 'avatars' });
+    
+    const avatarURL = url;
     await User.findByIdAndUpdate(_id, { avatarURL });
+    await fs.unlink(req.file.path);
 
     res.json({
         avatarURL,
