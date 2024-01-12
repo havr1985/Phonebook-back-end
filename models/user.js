@@ -5,15 +5,20 @@ const Joi = require('joi');
 const subscriptionList = ['starter', 'pro', 'business'];
 
 const userSchema = new Schema({
-    password: {
+    name: {
         type: String,
-        required: [true, 'Set password for user'],
+        required: true,
     },
     email: {
         type: String,
         required: [true, 'Email is required'],
         unique: true,
     },
+    password: {
+        type: String,
+        required: [true, 'Set password for user'],
+    },
+    
     subscription: {
         type: String,
         enum: subscriptionList,
@@ -38,6 +43,7 @@ const userSchema = new Schema({
 }, { versionKey: false, timestamps: true });
 
 const registerSchema = Joi.object({
+    name: Joi.string().min(3).required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
     
